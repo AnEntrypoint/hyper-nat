@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hyperswarm/dht": "^6.2.1",
+    "@hyperswarm/dht": "^latest",
     "base58-js": "^1.0.5",
-    "keypear": "^1.1.1",
+    "keypear": "^latest",
     "pump": "^3.0.0",
     "readline": "^1.3.0",
     "yargs": "^17.5.1"
