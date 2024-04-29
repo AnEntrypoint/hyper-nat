@@ -13,61 +13,22 @@ const relay = async () => {
             server: async (keyPair, port, host) => {
                 const server = node.createServer({ reusableSocket: true });
                 server.on("connection", function (servsock) {
-                    console.log('new connection, relaying to ' + port)
-                    var socket = net.connect({port, host })
-                    let open = { local:true, remote:true }
-                    socket.on('data', (d)=>{servsock.write(d)})
-                    servsock.on('data', (d)=>{socket.write(d)})
-            
-                    const remoteend = (type) => {
-                      console.log('local has ended, ending remote', type)
-                      if(open.remote) servsock.end();
-                      open.remote = false;
-                    }
-                    const localend = (type) => {
-                      console.log('remote has ended, ending local', type)
-                      if(open.local) socket.end();
-                      open.local = false;
-                    }
-                    socket.on('error', remoteend)
-                    socket.on('finish', remoteend)
-                    socket.on('end', remoteend)
-                    servsock.on('finish', localend)
-                    servsock.on('error', localend)
-                    servsock.on('end', localend)
+                    console.log('new connection, relaying to ' + port);
+                    var socket = net.connect({port, host, allowHalfOpen: true });
+                    pump(servsock, socket, servsock);
                 });
 
                 console.log('listening for remote connections for tcp ', port);
                 server.listen(keyPair);
             },
             client: async (publicKey, port) => {
-                var server = net.createServer({},function (local) {
+                var server = net.createServer({allowHalfOpen: true},function (local) {
                     console.log('connecting to tcp ', port);
                     const socket = node.connect(publicKey, { reusableSocket: true });
-                    let open = { local:true, remote:true };
-                    local.on('data', (d)=>{socket.write(d)});
-                    socket.on('data', (d)=>{local.write(d)});
-            
-                    const remoteend = () => {
-                      if(open.remote) socket.end();
-                      open.remote = false;
-                    }
-                    const localend = () => {
-                      if(open.local) local.end();
-                      open.local = false;
-                    }
-                    local.on('error', remoteend)
-                    local.on('finish', remoteend)
-                    local.on('end', remoteend)
-                    socket.on('finish', localend)
-                    socket.on('error', localend)
-                    socket.on('end', localend)
+                    pump(local, socket, local);
                 });
-                const socket = node.connect(publicKey, { reusableSocket: true })
-                socket.on('open', (d)=>{socket.write('test')})
-                socket.on('data', (d)=>{socket.end()});
-                server.listen(port, "127.0.0.1")
-                console.log('listening for local connections on tcp', port)
+                server.listen(port, "127.0.0.1");
+                console.log('listening for local connections on tcp', port);
             }
         },
         udp: {
