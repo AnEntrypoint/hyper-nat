@@ -14,7 +14,7 @@ const relay = async () => {
                 const server = node.createServer({ reusableSocket: true });
                 server.on("connection", function (servsock) {
                     console.log('new connection, relaying to ' + port)
-                    var socket = net.connect({port, host, allowHalfOpen: true })
+                    var socket = net.connect({port, host })
                     let open = { local:true, remote:true }
                     socket.on('data', (d)=>{servsock.write(d)})
                     servsock.on('data', (d)=>{socket.write(d)})
@@ -41,7 +41,7 @@ const relay = async () => {
                 server.listen(keyPair);
             },
             client: async (publicKey, port) => {
-                var server = net.createServer({allowHalfOpen: true},function (local) {
+                var server = net.createServer({},function (local) {
                     console.log('connecting to tcp ', port);
                     const socket = node.connect(publicKey, { reusableSocket: true });
                     let open = { local:true, remote:true };
