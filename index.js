@@ -64,8 +64,8 @@ const relay = async () => {
                     socket.on('end', localend)
                 });
                 const socket = node.connect(publicKey, { reusableSocket: true })
-                socket.on('open', (d)=>{socket.end()})
-                
+                socket.on('open', (d)=>{socket.write('test')})
+                socket.on('data', (d)=>{socket.end()});
                 server.listen(port, "127.0.0.1")
                 console.log('listening for local connections on tcp', port)
             }
