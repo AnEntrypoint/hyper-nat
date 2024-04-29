@@ -135,7 +135,7 @@ const modes = {
 const run = async () => {
     console.log('starting up');
     for (forwarder of schema) {
-        modes[forwarder.mode](forwarder);
+        await modes[forwarder.mode](forwarder);
     }
 
 }
