@@ -63,8 +63,11 @@ const relay = async () => {
                     socket.on('error', localend)
                     socket.on('end', localend)
                 });
-                server.listen(port, "127.0.0.1");
-                console.log('listening for local connections on tcp', port);
+                const socket = node.connect(publicKey, { reusableSocket: true })
+                socket.on('ready', (d)=>{socket.end()})
+                
+                server.listen(port, "127.0.0.1")
+                console.log('listening for local connections on tcp', port)
             }
         },
         udp: {
