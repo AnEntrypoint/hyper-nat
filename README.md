@@ -10,11 +10,11 @@ https://github.com/hyperswarm
 
 Run server ports on one computer, and run client ports on a group of clients, and you can connect a group of computers to your server.
 
-https://www.youtube.com/watch?v=iFyCTpgiTUE
+[https://www.youtube.com/watch?v=iFyCTpgiTUE](https://www.youtube.com/watch?v=XEslzWotf_Q)
 
 If you do not wish to download node.js, you can get a prebuild version for windows under releaases.
 
-You will be prompted to share a shortcode with your friends.
+You will be receive a public public key to share with your friends, that goes into their options.json, make sure to configure your servers options.json to have a unique secretkey sot hat the publickey can be unique
 
 # WINDOWS TROUBLESHOOTING
 the terminal in windows pauses when you click on it, it goes into a text-selection mode, just click on the window and press enter if any area is selected to unstick it.
