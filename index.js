@@ -26,17 +26,27 @@ const relay = async () => {
                 server.listen(keyPair);
             },
             client: async (publicKey, port) => {
-                var server = net.createServer({allowHalfOpen: true},function (local) {
-                    console.log('connecting to tcp ', port);
+                console.log('connecting to tcp', port);
+                
+                // Test the connection first to ensure it's ready
+                const testSocket = node.connect(publicKey, { reusableSocket: true });
+                await new Promise((resolve, reject) => {
+                    testSocket.on('open', () => {
+                        testSocket.destroy();
+                        resolve();
+                    });
+                    testSocket.on('error', reject);
+                });
+                console.log('connection ready');
+                
+                var server = net.createServer({allowHalfOpen: true}, function (local) {
+                    console.log('new local connection, relaying to remote tcp', port);
                     const socket = node.connect(publicKey, { reusableSocket: true });
                     pump(local, socket, local);
                 });
-                const socket = node.connect(publicKey, { reusableSocket: true });
-                socket.on('open', (d)=>{socket.write('test')})
-                socket.on('data', (d)=>{socket.end();
-                                       server.listen(port, "127.0.0.1")});
                 
-                console.log('listening for local connections on tcp', port);
+                server.listen(port, "127.0.0.1");
+                console.log('TCP stream ready, listening for connections on', port);
             }
         },
         udp: {
