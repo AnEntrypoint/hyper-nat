@@ -1,0 +1,80 @@
+{
+  "testId": "7ed3c725-a552-4641-8270-2fd7cb16b6af",
+  "startTime": 1757349019026,
+  "endTime": 1757349093532,
+  "duration": 74506,
+  "results": [
+    {
+      "protocol": "tcp",
+      "timestamp": 1757349019029,
+      "phases": {
+        "httpServer": {
+          "success": true,
+          "port": 8500
+        },
+        "relayServer": {
+          "success": true,
+          "publicKey": "xMBnP1Qan3vzRCymhQ5fSkunACA3tYauhLKFJXofXgf",
+          "secret": "test-tcp-1757349019033"
+        },
+        "relayClient": {
+          "success": false,
+          "error": "Client startup timeout - not ready"
+        }
+      },
+      "success": false,
+      "error": "Relay client failed: Client startup timeout - not ready",
+      "timing": {}
+    },
+    {
+      "protocol": "udp",
+      "timestamp": 1757349043869,
+      "phases": {
+        "httpServer": {
+          "success": true,
+          "port": 8510
+        },
+        "relayServer": {
+          "success": true,
+          "publicKey": "7KJfi4SXSRbynrmawx5bZGuG2tFb8DXwq5xDxpvYi8gB",
+          "secret": "test-udp-1757349043870"
+        },
+        "relayClient": {
+          "success": false,
+          "error": "Client startup timeout - not ready"
+        }
+      },
+      "success": false,
+      "error": "Relay client failed: Client startup timeout - not ready",
+      "timing": {}
+    },
+    {
+      "protocol": "tcpudp",
+      "timestamp": 1757349068742,
+      "phases": {
+        "httpServer": {
+          "success": true,
+          "port": 8520
+        },
+        "relayServer": {
+          "success": true,
+          "publicKey": "GvBgqG1dYxdCWDatj8bHBzBDguPwLqE2KWjNnB98q6Nt",
+          "secret": "test-tcpudp-1757349068743"
+        },
+        "relayClient": {
+          "success": false,
+          "error": "Client startup timeout - not ready"
+        }
+      },
+      "success": false,
+      "error": "Relay client failed: Client startup timeout - not ready",
+      "timing": {}
+    }
+  ],
+  "summary": {
+    "totalProtocols": 3,
+    "workingProtocols": 0,
+    "successRate": "0%",
+    "avgLatencies": []
+  }
+}

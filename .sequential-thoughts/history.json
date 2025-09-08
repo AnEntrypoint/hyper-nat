@@ -1,0 +1,55 @@
+{
+  "history": [
+    {
+      "action": "create",
+      "thoughtId": "thought_1",
+      "timestamp": "2025-09-08T16:33:33.896Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_2",
+      "timestamp": "2025-09-08T16:33:33.896Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_3",
+      "timestamp": "2025-09-08T16:33:33.896Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_4",
+      "timestamp": "2025-09-08T16:33:33.896Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_5",
+      "timestamp": "2025-09-08T16:33:33.896Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_6",
+      "timestamp": "2025-09-08T16:34:02.991Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_7",
+      "timestamp": "2025-09-08T16:34:02.991Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_8",
+      "timestamp": "2025-09-08T16:34:02.991Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_9",
+      "timestamp": "2025-09-08T16:34:02.991Z"
+    },
+    {
+      "action": "create",
+      "thoughtId": "thought_10",
+      "timestamp": "2025-09-08T16:34:02.991Z"
+    }
+  ],
+  "totalThoughts": 10
+}

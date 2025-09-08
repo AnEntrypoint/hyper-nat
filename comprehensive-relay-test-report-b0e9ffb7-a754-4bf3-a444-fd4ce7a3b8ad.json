@@ -1,0 +1,66 @@
+{
+  "testId": "b0e9ffb7-a754-4bf3-a444-fd4ce7a3b8ad",
+  "timestamp": 1757349363011,
+  "duration": 83269,
+  "summary": {
+    "total": 3,
+    "passed": 0,
+    "failed": 3
+  },
+  "results": [
+    {
+      "protocol": "tcp",
+      "timestamp": 1757349365077,
+      "success": false,
+      "phases": {
+        "direct": {
+          "success": true,
+          "statusCode": 200,
+          "data": "{\n  \"status\": \"healthy\",\n  \"server\": {\n    \"id\": \"9ff192e3-a3c3-4bc4-a442-1e839650d07d\",\n    \"mode\": \"relay-test\",\n    \"port\": 8888,\n    \"uptime\": 2023,\n    \"requestCount\": 1\n  },\n  \"request\": {\n    \"id\": \"ef4ed5f1-31c6-4bf5-b4c0-8be332af5ff0\",\n    \"timestamp\": 1757349365088,\n    \"localTime\": \"2025-09-08T16:36:05.088Z\"\n  }\n}",
+          "latency": 20
+        },
+        "server": {
+          "success": true,
+          "publicKey": "31Qzz1Cn5KXHD6Pnm2QnxyoArJi1V447mbochaTyhAMF"
+        }
+      },
+      "error": "Timeout waiting for tcp client"
+    },
+    {
+      "protocol": "udp",
+      "timestamp": 1757349393023,
+      "success": false,
+      "phases": {
+        "direct": {
+          "success": true,
+          "statusCode": 200,
+          "data": "{\n  \"status\": \"healthy\",\n  \"server\": {\n    \"id\": \"2d01ddbd-f936-4221-b06b-88757148476b\",\n    \"mode\": \"relay-test\",\n    \"port\": 8888,\n    \"uptime\": 2017,\n    \"requestCount\": 1\n  },\n  \"request\": {\n    \"id\": \"e7c47966-d237-4d50-864c-9f403e438299\",\n    \"timestamp\": 1757349393027,\n    \"localTime\": \"2025-09-08T16:36:33.027Z\"\n  }\n}",
+          "latency": 9
+        },
+        "server": {
+          "success": true,
+          "publicKey": "B7V5rG6H18bA9nPBXtVRDEwCCj6VDDTYmPkZvRf9PjzN"
+        }
+      },
+      "error": "Timeout waiting for udp client"
+    },
+    {
+      "protocol": "tcpudp",
+      "timestamp": 1757349420820,
+      "success": false,
+      "phases": {
+        "direct": {
+          "success": true,
+          "statusCode": 200,
+          "data": "{\n  \"status\": \"healthy\",\n  \"server\": {\n    \"id\": \"a89c2daa-2aee-4d05-8e62-a451e32907aa\",\n    \"mode\": \"relay-test\",\n    \"port\": 8888,\n    \"uptime\": 2014,\n    \"requestCount\": 1\n  },\n  \"request\": {\n    \"id\": \"2377e7bc-071f-432c-871c-7253977a8e2b\",\n    \"timestamp\": 1757349420824,\n    \"localTime\": \"2025-09-08T16:37:00.824Z\"\n  }\n}",
+          "latency": 7
+        },
+        "server": {
+          "success": true,
+          "publicKey": "4JnWqZfenv93DFsKziX6KC9DpEqnmC52uMA3wqrLRYvC"
+        }
+      },
+      "error": "Timeout waiting for tcpudp client"
+    }
+  ]
+}
