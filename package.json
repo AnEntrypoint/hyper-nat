@@ -1,6 +1,6 @@
 {
   "name": "hyper-nat",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Securely tunnel UDP and TCP connections over peer-to-peer networks using hyperswarm for NAT traversal",
   "main": "index.js",
   "bin": {
