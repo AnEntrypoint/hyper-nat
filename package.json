@@ -1,20 +1,35 @@
 {
-  "name": "udp-forward",
+  "name": "hyper-nat",
   "version": "1.0.0",
-  "description": "",
+  "description": "Securely tunnel UDP and TCP connections over peer-to-peer networks using hyperswarm for NAT traversal",
   "main": "index.js",
+  "bin": {
+    "hyper-nat": "./index.js"
+  },
   "scripts": {
     "build": "npx nexe",
     "start": "node index.js"
   },
+  "keywords": ["udp", "tcp", "tunnel", "p2p", "nat", "hyperswarm", "forwarding", "networking"],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/hyper-nat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/username/hyper-nat/issues"
+  },
+  "homepage": "https://github.com/username/hyper-nat#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
-    "@hyperswarm/dht": "latest",
-    "base58-js": "^1.0.5",
-    "keypear": "latest",
-    "pump": "^3.0.0",
+    "@hyperswarm/dht": "^6.5.1",
+    "bs58": "^6.0.0",
+    "keypear": "^1.2.2",
+    "pump": "^3.0.3",
     "readline": "^1.3.0",
-    "yargs": "^17.5.1"
+    "yargs": "^18.0.0"
   }
 }
