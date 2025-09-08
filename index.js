@@ -31,17 +31,45 @@ const relay = async () => {
                 // Test the connection first to ensure it's ready
                 const testSocket = node.connect(publicKey, { reusableSocket: true });
                 await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        testSocket.destroy();
+                        reject(new Error('Connection timeout after 15 seconds'));
+                    }, 15000);
+
                     testSocket.on('open', () => {
+                        clearTimeout(timeout);
                         testSocket.destroy();
                         resolve();
                     });
-                    testSocket.on('error', reject);
+
+                    testSocket.on('error', (err) => {
+                        clearTimeout(timeout);
+                        reject(err);
+                    });
                 });
                 console.log('connection ready');
                 
                 var server = net.createServer({allowHalfOpen: true}, function (local) {
                     console.log('new local connection on port ' + config.localPort + ', relaying to remote tcp ' + port);
                     const socket = node.connect(publicKey, { reusableSocket: true });
+                    
+                    // Add connection timeout
+                    const timeout = setTimeout(() => {
+                        if (!socket.connected) {
+                            socket.destroy();
+                            local.destroy(new Error('Connection timeout after 15 seconds'));
+                        }
+                    }, 15000);
+
+                    socket.on('open', () => {
+                        clearTimeout(timeout);
+                    });
+
+                    socket.on('error', (err) => {
+                        clearTimeout(timeout);
+                        local.destroy(err);
+                    });
+
                     pump(local, socket, local);
                 });
                 
@@ -69,7 +97,22 @@ const relay = async () => {
             client: async (publicKey, port) => {
                 console.log('connecting to udp', port);
                 const conn = await node.connect(publicKey);
-                await new Promise(res => conn.on('open', res));
+                await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        conn.destroy();
+                        reject(new Error('Connection timeout after 15 seconds'));
+                    }, 15000);
+
+                    conn.on('open', () => {
+                        clearTimeout(timeout);
+                        resolve();
+                    });
+
+                    conn.on('error', (err) => {
+                        clearTimeout(timeout);
+                        reject(err);
+                    });
+                });
                 console.log('connection open');
                 var server = udp.createSocket('udp4');
                 let inport;
