@@ -92,38 +92,72 @@ const relay = async () => {
                 const server = node.createServer();
                 server.on("connection", function (conn) {
                     console.log('new connection, relaying to tcp-over-udp ' + port);
-                    var socket = net.connect({port, host, allowHalfOpen: true });
+                    var socket = net.connect({port, host, allowHalfOpen: false });
                     
-                    // TCP to UDP transport: read from TCP socket and send via UDP rawStream
-                    socket.on('data', (data) => {
-                        conn.rawStream.send(data);
-                    });
-                    
-                    // UDP transport to TCP: receive from UDP rawStream and write to TCP socket
-                    conn.rawStream.on('message', function (data) {
-                        socket.write(data);
+                    // Wait for socket connection before setting up data flow
+                    socket.on('connect', () => {
+                        console.log('connected to local service');
+                        
+                        // TCP to UDP transport: read from TCP socket and send via UDP rawStream
+                        socket.on('data', (data) => {
+                            try {
+                                if (conn && !conn.destroyed) {
+                                    conn.rawStream.send(data);
+                                }
+                            } catch (err) {
+                                console.log('error sending data to remote:', err.message);
+                                socket.destroy();
+                            }
+                        });
+                        
+                        // UDP transport to TCP: receive from UDP rawStream and write to TCP socket
+                        conn.rawStream.on('message', function (data) {
+                            try {
+                                if (socket && !socket.destroyed) {
+                                    socket.write(data);
+                                }
+                            } catch (err) {
+                                console.log('error writing data to local socket:', err.message);
+                                conn.destroy();
+                            }
+                        });
                     });
                     
                     // Handle TCP socket events
                     socket.on('close', () => {
                         console.log('local tcp connection closed');
-                        conn.destroy();
+                        if (conn && !conn.destroyed) {
+                            conn.destroy();
+                        }
+                    });
+                    
+                    socket.on('end', () => {
+                        console.log('local tcp connection ended');
+                        if (conn && !conn.destroyed) {
+                            conn.destroy();
+                        }
                     });
                     
                     socket.on('error', (err) => {
                         console.log('local tcp socket error:', err.message);
-                        conn.destroy();
+                        if (conn && !conn.destroyed) {
+                            conn.destroy();
+                        }
                     });
                     
                     // Handle UDP connection events
                     conn.on('close', () => {
                         console.log('remote udp connection closed');
-                        socket.destroy();
+                        if (socket && !socket.destroyed) {
+                            socket.destroy();
+                        }
                     });
                     
                     conn.on('error', (err) => {
                         console.log('remote udp connection error:', err.message);
-                        socket.destroy();
+                        if (socket && !socket.destroyed) {
+                            socket.destroy();
+                        }
                     });
                 });
                 console.log('listening for remote connections for tcp-over-udp', port);
@@ -138,24 +172,49 @@ const relay = async () => {
                 testConn.destroy();
                 console.log('connection ready');
                 
-                var server = net.createServer({allowHalfOpen: true}, function (localSocket) {
+                var server = net.createServer({allowHalfOpen: false}, async function (localSocket) {
                     console.log('new local tcp connection, relaying to remote tcp-over-udp', port);
-                    const conn = node.connect(publicKey);
                     
-                    conn.on('open', () => {
+                    try {
+                        const conn = node.connect(publicKey);
+                        
+                        // Wait for connection to be ready before setting up data flow
+                        await new Promise((resolve, reject) => {
+                            conn.on('open', resolve);
+                            conn.on('error', reject);
+                            setTimeout(() => reject(new Error('Connection timeout')), 10000);
+                        });
+                        
                         // TCP to UDP transport: read from local TCP socket and send via UDP rawStream
                         localSocket.on('data', (data) => {
-                            conn.rawStream.send(data);
+                            try {
+                                conn.rawStream.send(data);
+                            } catch (err) {
+                                console.log('error sending data to remote:', err.message);
+                                localSocket.destroy();
+                            }
                         });
                         
                         // UDP transport to TCP: receive from UDP rawStream and write to local TCP socket
                         conn.rawStream.on('message', function (data) {
-                            localSocket.write(data);
+                            try {
+                                if (!localSocket.destroyed) {
+                                    localSocket.write(data);
+                                }
+                            } catch (err) {
+                                console.log('error writing data to local socket:', err.message);
+                                conn.destroy();
+                            }
                         });
                         
                         // Handle local TCP socket events
                         localSocket.on('close', () => {
                             console.log('local tcp connection closed');
+                            conn.destroy();
+                        });
+                        
+                        localSocket.on('end', () => {
+                            console.log('local tcp connection ended');
                             conn.destroy();
                         });
                         
@@ -167,19 +226,22 @@ const relay = async () => {
                         // Handle remote UDP connection events
                         conn.on('close', () => {
                             console.log('remote udp connection closed');
-                            localSocket.destroy();
+                            if (!localSocket.destroyed) {
+                                localSocket.destroy();
+                            }
                         });
                         
                         conn.on('error', (err) => {
                             console.log('remote udp connection error:', err.message);
-                            localSocket.destroy();
+                            if (!localSocket.destroyed) {
+                                localSocket.destroy();
+                            }
                         });
-                    });
-                    
-                    conn.on('error', (err) => {
+                        
+                    } catch (err) {
                         console.log('failed to connect to remote:', err.message);
                         localSocket.destroy();
-                    });
+                    }
                 });
                 
                 server.listen(port, "127.0.0.1");
