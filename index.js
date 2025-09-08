@@ -98,9 +98,7 @@ const modes = {
             console.log(`\n=== CLIENT CONNECTION COMMAND FOR ${proto.toUpperCase()}:${port} ===`);
             console.log(`npx hyper-nat client -p ${port} --protocol ${proto} -k ${publicKey}`);
             console.log(`=== END COMMAND ===\n`);
-        } else {
-            console.log("SHARE THIS PUBLIC KEY:", publicKey);
-        }
+	} 
         
         const rel = await relay();
         const keys = new Keychain(kp);
