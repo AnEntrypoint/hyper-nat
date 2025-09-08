@@ -22,7 +22,7 @@ const relay = async () => {
                     pump(servsock, socket, servsock);
                 });
 
-                console.log('listening for remote connections for tcp ', port);
+                console.log('listening for remote connections for tcp', port);
                 server.listen(keyPair);
             },
             client: async (publicKey, port) => {
