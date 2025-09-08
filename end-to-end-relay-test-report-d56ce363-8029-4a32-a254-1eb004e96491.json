@@ -1,0 +1,38 @@
+{
+  "testId": "d56ce363-8029-4a32-a254-1eb004e96491",
+  "startTime": 1757348513981,
+  "endTime": 1757348532010,
+  "duration": 18029,
+  "results": [
+    {
+      "protocol": "tcp",
+      "timestamp": 1757348513986,
+      "phases": {},
+      "success": false,
+      "error": "listen EADDRINUSE: address already in use 127.0.0.1:8080",
+      "timing": {}
+    },
+    {
+      "protocol": "udp",
+      "timestamp": 1757348519997,
+      "phases": {},
+      "success": false,
+      "error": "listen EADDRINUSE: address already in use 127.0.0.1:8080",
+      "timing": {}
+    },
+    {
+      "protocol": "tcpudp",
+      "timestamp": 1757348526004,
+      "phases": {},
+      "success": false,
+      "error": "listen EADDRINUSE: address already in use 127.0.0.1:8080",
+      "timing": {}
+    }
+  ],
+  "summary": {
+    "totalProtocols": 3,
+    "workingProtocols": 0,
+    "successRate": "0%",
+    "avgLatencies": []
+  }
+}
