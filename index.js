@@ -18,8 +18,53 @@ const relay = async () => {
                 const server = node.createServer({ reusableSocket: true });
                 server.on("connection", function (servsock) {
                     console.log('new connection, relaying to ' + port);
-                    var socket = net.connect({port, host, allowHalfOpen: true });
-                    pump(servsock, socket, servsock);
+                    var socket = net.connect({
+                        port, 
+                        host, 
+                        allowHalfOpen: true,
+                        timeout: 15000
+                    });
+
+                    let destroyed = false;
+                    const cleanup = () => {
+                        if (!destroyed) {
+                            destroyed = true;
+                            socket.end();
+                            servsock.end();
+                        }
+                    };
+
+                    socket.on('timeout', () => {
+                        console.log('Local connection timeout');
+                        cleanup();
+                    });
+
+                    socket.on('error', (err) => {
+                        console.log('Local connection error:', err.message);
+                        cleanup();
+                    });
+
+                    servsock.on('error', (err) => {
+                        console.log('Remote connection error:', err.message);
+                        cleanup();
+                    });
+
+                    socket.on('end', () => {
+                        console.log('Local connection ended naturally');
+                        servsock.end();
+                    });
+
+                    servsock.on('end', () => {
+                        console.log('Remote connection ended naturally');
+                        socket.end();
+                    });
+
+                    pump(servsock, socket, servsock, (err) => {
+                        if (err) {
+                            console.log('Pump error:', err.message);
+                        }
+                        cleanup();
+                    });
                 });
 
                 console.log('listening for remote connections for tcp', port);
@@ -53,24 +98,53 @@ const relay = async () => {
                     console.log('new local connection on port ' + config.localPort + ', relaying to remote tcp ' + port);
                     const socket = node.connect(publicKey, { reusableSocket: true });
                     
-                    // Add connection timeout
-                    const timeout = setTimeout(() => {
-                        if (!socket.connected) {
-                            socket.destroy();
-                            local.destroy(new Error('Connection timeout after 15 seconds'));
+                    let destroyed = false;
+                    const cleanup = () => {
+                        if (!destroyed) {
+                            destroyed = true;
+                            clearTimeout(connectTimeout);
+                            socket.end();
+                            local.end();
                         }
+                    };
+
+                    // Add connection timeout
+                    const connectTimeout = setTimeout(() => {
+                        console.log('Connection timeout');
+                        cleanup();
                     }, 15000);
 
                     socket.on('open', () => {
-                        clearTimeout(timeout);
+                        clearTimeout(connectTimeout);
+                        console.log('Remote connection established');
                     });
 
                     socket.on('error', (err) => {
-                        clearTimeout(timeout);
-                        local.destroy(err);
+                        console.log('Remote connection error:', err.message);
+                        cleanup();
                     });
 
-                    pump(local, socket, local);
+                    local.on('error', (err) => {
+                        console.log('Local connection error:', err.message);
+                        cleanup();
+                    });
+
+                    socket.on('end', () => {
+                        console.log('Remote connection ended naturally');
+                        local.end();
+                    });
+
+                    local.on('end', () => {
+                        console.log('Local connection ended naturally');
+                        socket.end();
+                    });
+
+                    pump(local, socket, local, (err) => {
+                        if (err) {
+                            console.log('Pump error:', err.message);
+                        }
+                        cleanup();
+                    });
                 });
                 
                 server.listen(config.localPort, "127.0.0.1");
@@ -83,13 +157,54 @@ const relay = async () => {
                 server.on("connection", function (conn) {
                     console.log('new connection, relaying to ' + port);
                     var client = udp.createSocket('udp4');
+                    
+                    let destroyed = false;
+                    const cleanup = () => {
+                        if (!destroyed) {
+                            destroyed = true;
+                            client.close();
+                            conn.end();
+                        }
+                    };
+
+                    client.on('error', (err) => {
+                        console.log('UDP client error:', err.message);
+                        cleanup();
+                    });
+
+                    conn.on('error', (err) => {
+                        console.log('UDP connection error:', err.message);
+                        cleanup();
+                    });
+
+                    conn.on('end', () => {
+                        console.log('UDP connection ended naturally');
+                        cleanup();
+                    });
+
                     client.connect(port, host);
+                    
                     client.on('message', (buf) => {
-                        conn.rawStream.send(buf);
-                    })
+                        if (!destroyed) {
+                            try {
+                                conn.rawStream.send(buf);
+                            } catch (err) {
+                                console.log('Error sending to remote:', err.message);
+                                cleanup();
+                            }
+                        }
+                    });
+
                     conn.rawStream.on('message', function (buf) {
-                        client.send(buf);
-                    })
+                        if (!destroyed) {
+                            try {
+                                client.send(buf);
+                            } catch (err) {
+                                console.log('Error sending to local:', err.message);
+                                cleanup();
+                            }
+                        }
+                    });
                 });
                 console.log('listening for remote connections for udp', port);
                 await server.listen(keyPair);
