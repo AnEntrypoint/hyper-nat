@@ -40,12 +40,12 @@ const relay = async () => {
                 console.log('connection ready');
                 
                 var server = net.createServer({allowHalfOpen: true}, function (local) {
-                    console.log('new local connection, relaying to remote tcp', port);
+                    console.log('new local connection on port ' + config.localPort + ', relaying to remote tcp ' + port);
                     const socket = node.connect(publicKey, { reusableSocket: true });
                     pump(local, socket, local);
                 });
                 
-                server.listen(port, "127.0.0.1");
+                server.listen(config.localPort, "127.0.0.1");
                 console.log('TCP stream ready, listening for connections on', port);
             }
         },
@@ -83,7 +83,7 @@ const relay = async () => {
                 conn.rawStream.on('message', (buf) => {
                     server.send(buf, inport);
                 })
-                server.bind(port);
+                server.bind(config.localPort);
                 console.log('UDP stream ready, listening for packets on ', port);
             }
         },
@@ -414,11 +414,17 @@ const argv = yargs(hideBin(process.argv))
     })
     .command('client', 'Run as client mode', (yargs) => {
         return yargs
-            .option('port', {
-                alias: 'p',
+            .option('local-port', {
+                alias: 'l',
                 type: 'string',
                 demandOption: true,
                 description: 'Local port(s) to bind (comma-separated for multiple: 3000,3001,3002)'
+            })
+            .option('remote-port', {
+                alias: 'r',
+                type: 'string',
+                demandOption: true,
+                description: 'Remote port(s) to connect to (comma-separated for multiple: 80,8080,443)'
             })
             .option('protocol', {
                 alias: 'proto',
@@ -443,9 +449,9 @@ const argv = yargs(hideBin(process.argv))
     .example('$0 server -p 3000 -s mysecret', 'Run server on single port 3000')
     .example('$0 server -p 3000 --protocol tcpudp -s mysecret', 'Run server with TCP-over-UDP on port 3000')
     .example('$0 server -p 3000,3001,3002 --protocol udp,tcp,tcpudp -s mysecret', 'Run server on multiple ports with different protocols')
-    .example('$0 client -p 3000 -k <publickey>', 'Connect to server on single port 3000')
-    .example('$0 client -p 3000 --protocol tcpudp -k <publickey>', 'Connect using TCP-over-UDP on port 3000')
-    .example('$0 client -p 3000,3001 --protocol udp,tcpudp -k <publickey>', 'Connect to server on multiple ports with different protocols')
+    .example('$0 client -l 8080 -r 80 -k <publickey>', 'Connect local port 8080 to remote port 80')
+    .example('$0 client -l 8080 -r 80 --protocol tcpudp -k <publickey>', 'Connect using TCP-over-UDP from local 8080 to remote 80')
+    .example('$0 client -l 8080,8081 -r 80,443 --protocol udp,tcpudp -k <publickey>', 'Connect multiple ports with different protocols')
     .example('$0 -c myconfig.json', 'Use configuration file')
     .demandCommand(0, 1, 'You can specify a command, use config file, or run without arguments for default server mode')
     .argv;
@@ -541,26 +547,33 @@ const main = async () => {
         await runFromConfig(configurations, true);
         
     } else if (command === 'client') {
-        const ports = parsePortList(argv.port);
-        const protocols = parseProtocolList(argv.protocol, ports.length);
+        const localPorts = parsePortList(argv['local-port']);
+        const remotePorts = parsePortList(argv['remote-port']);
+        const protocols = parseProtocolList(argv.protocol, localPorts.length);
         
-        if (ports.length === 0) {
+        if (localPorts.length === 0 || remotePorts.length === 0) {
             console.error('Error: No valid ports specified');
             process.exit(1);
         }
         
-        if (protocols.length !== ports.length) {
-            console.error(`Error: Number of protocols (${protocols.length}) must match number of ports (${ports.length})`);
+        if (localPorts.length !== remotePorts.length) {
+            console.error(`Error: Number of local ports (${localPorts.length}) must match number of remote ports (${remotePorts.length})`);
             process.exit(1);
         }
         
-        console.log(`Starting client mode with ${ports.length} port(s)`);
+        if (protocols.length !== localPorts.length) {
+            console.error(`Error: Number of protocols (${protocols.length}) must match number of ports (${localPorts.length})`);
+            process.exit(1);
+        }
+        
+        console.log(`Starting client mode with ${localPorts.length} port mappings`);
         
         // Create multiple configurations and run them
-        const configurations = ports.map((port, index) => ({
+        const configurations = localPorts.map((localPort, index) => ({
             mode: 'client',
             proto: protocols[index],
-            port: port,
+            port: remotePorts[index],
+            localPort: localPort,
             publicKey: argv.publicKey || argv['public-key']
         }));
         
