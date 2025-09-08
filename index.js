@@ -86,6 +86,105 @@ const relay = async () => {
                 server.bind(port);
                 console.log('UDP stream ready, listening for packets on ', port);
             }
+        },
+        tcpudp: {
+            server: async (keyPair, port, host) => {
+                const server = node.createServer();
+                server.on("connection", function (conn) {
+                    console.log('new connection, relaying to tcp-over-udp ' + port);
+                    var socket = net.connect({port, host, allowHalfOpen: true });
+                    
+                    // TCP to UDP transport: read from TCP socket and send via UDP rawStream
+                    socket.on('data', (data) => {
+                        conn.rawStream.send(data);
+                    });
+                    
+                    // UDP transport to TCP: receive from UDP rawStream and write to TCP socket
+                    conn.rawStream.on('message', function (data) {
+                        socket.write(data);
+                    });
+                    
+                    // Handle TCP socket events
+                    socket.on('close', () => {
+                        console.log('local tcp connection closed');
+                        conn.destroy();
+                    });
+                    
+                    socket.on('error', (err) => {
+                        console.log('local tcp socket error:', err.message);
+                        conn.destroy();
+                    });
+                    
+                    // Handle UDP connection events
+                    conn.on('close', () => {
+                        console.log('remote udp connection closed');
+                        socket.destroy();
+                    });
+                    
+                    conn.on('error', (err) => {
+                        console.log('remote udp connection error:', err.message);
+                        socket.destroy();
+                    });
+                });
+                console.log('listening for remote connections for tcp-over-udp', port);
+                await server.listen(keyPair);
+            },
+            client: async (publicKey, port) => {
+                console.log('connecting to tcp-over-udp', port);
+                
+                // Test the connection first to ensure it's ready
+                const testConn = await node.connect(publicKey);
+                await new Promise(res => testConn.on('open', res));
+                testConn.destroy();
+                console.log('connection ready');
+                
+                var server = net.createServer({allowHalfOpen: true}, function (localSocket) {
+                    console.log('new local tcp connection, relaying to remote tcp-over-udp', port);
+                    const conn = node.connect(publicKey);
+                    
+                    conn.on('open', () => {
+                        // TCP to UDP transport: read from local TCP socket and send via UDP rawStream
+                        localSocket.on('data', (data) => {
+                            conn.rawStream.send(data);
+                        });
+                        
+                        // UDP transport to TCP: receive from UDP rawStream and write to local TCP socket
+                        conn.rawStream.on('message', function (data) {
+                            localSocket.write(data);
+                        });
+                        
+                        // Handle local TCP socket events
+                        localSocket.on('close', () => {
+                            console.log('local tcp connection closed');
+                            conn.destroy();
+                        });
+                        
+                        localSocket.on('error', (err) => {
+                            console.log('local tcp socket error:', err.message);
+                            conn.destroy();
+                        });
+                        
+                        // Handle remote UDP connection events
+                        conn.on('close', () => {
+                            console.log('remote udp connection closed');
+                            localSocket.destroy();
+                        });
+                        
+                        conn.on('error', (err) => {
+                            console.log('remote udp connection error:', err.message);
+                            localSocket.destroy();
+                        });
+                    });
+                    
+                    conn.on('error', (err) => {
+                        console.log('failed to connect to remote:', err.message);
+                        localSocket.destroy();
+                    });
+                });
+                
+                server.listen(port, "127.0.0.1");
+                console.log('TCP-over-UDP stream ready, listening for connections on', port);
+            }
         }
     }
 }
@@ -212,7 +311,7 @@ const parseProtocolList = (protocolArg, portCount) => {
     
     // Validate protocols
     protocols = protocols.map(p => {
-        if (!['tcp', 'udp'].includes(p)) {
+        if (!['tcp', 'udp', 'tcpudp'].includes(p)) {
             console.warn(`Invalid protocol '${p}', defaulting to 'udp'`);
             return 'udp';
         }
@@ -243,7 +342,7 @@ const argv = yargs(hideBin(process.argv))
                 alias: 'proto',
                 type: 'string',
                 default: 'udp',
-                description: 'Protocol(s) to use (comma-separated for multiple: tcp,udp,tcp)'
+                description: 'Protocol(s) to use: tcp, udp, or tcpudp (comma-separated for multiple: tcp,udp,tcpudp)'
             })
             .option('secret', {
                 alias: 's',
@@ -263,7 +362,7 @@ const argv = yargs(hideBin(process.argv))
                 alias: 'proto',
                 type: 'string',
                 default: 'udp',
-                description: 'Protocol(s) to use (comma-separated for multiple: tcp,udp,tcp)'
+                description: 'Protocol(s) to use: tcp, udp, or tcpudp (comma-separated for multiple: tcp,udp,tcpudp)'
             })
             .option('public-key', {
                 alias: 'k',
@@ -280,9 +379,11 @@ const argv = yargs(hideBin(process.argv))
     .help('h')
     .alias('h', 'help')
     .example('$0 server -p 3000 -s mysecret', 'Run server on single port 3000')
-    .example('$0 server -p 3000,3001,3002 --protocol udp,tcp,udp -s mysecret', 'Run server on multiple ports')
+    .example('$0 server -p 3000 --protocol tcpudp -s mysecret', 'Run server with TCP-over-UDP on port 3000')
+    .example('$0 server -p 3000,3001,3002 --protocol udp,tcp,tcpudp -s mysecret', 'Run server on multiple ports with different protocols')
     .example('$0 client -p 3000 -k <publickey>', 'Connect to server on single port 3000')
-    .example('$0 client -p 3000,3001 --protocol udp,tcp -k <publickey>', 'Connect to server on multiple ports')
+    .example('$0 client -p 3000 --protocol tcpudp -k <publickey>', 'Connect using TCP-over-UDP on port 3000')
+    .example('$0 client -p 3000,3001 --protocol udp,tcpudp -k <publickey>', 'Connect to server on multiple ports with different protocols')
     .example('$0 -c myconfig.json', 'Use configuration file')
     .demandCommand(0, 1, 'You can specify a command, use config file, or run without arguments for default server mode')
     .argv;

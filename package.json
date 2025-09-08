@@ -1,6 +1,6 @@
 {
   "name": "hyper-nat",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Securely tunnel UDP and TCP connections over peer-to-peer networks using hyperswarm for NAT traversal",
   "main": "index.js",
   "bin": {
@@ -13,12 +13,14 @@
   "keywords": [
     "udp",
     "tcp",
+    "tcpudp",
     "tunnel",
     "p2p",
     "nat",
     "hyperswarm",
     "forwarding",
-    "networking"
+    "networking",
+    "tcp-over-udp"
   ],
   "author": "",
   "license": "ISC",
@@ -39,6 +41,6 @@
     "keypear": "^1.2.2",
     "pump": "^3.0.3",
     "readline": "^1.3.0",
-    "yargs": "^18.0.0"
+    "yargs": "^17.7.2"
   }
 }
