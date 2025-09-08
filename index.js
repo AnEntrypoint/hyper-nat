@@ -313,7 +313,7 @@ const runFromConfig = async (schema, showConsolidatedCommand = false) => {
             
             // Output single consolidated command
             console.log(`\n=== CLIENT CONNECTION COMMAND ===`);
-            console.log(`npx hyper-nat client -p ${ports.join(',')} --protocol ${protocols.join(',')} -k ${publicKey}`);
+            console.log(`npx hyper-nat client -l ${ports.join(',')} -r ${ports.join(',')} --protocol ${protocols.join(',')} -k ${publicKey}`);
             console.log(`=== END COMMAND ===\n`);
         }
     }
@@ -324,6 +324,11 @@ const runFromConfig = async (schema, showConsolidatedCommand = false) => {
         const configWithCommandFlag = showConsolidatedCommand && forwarder.mode === 'server' 
             ? {...forwarder, showCommands: false} 
             : forwarder;
+
+        // Ensure config has all necessary properties for client mode
+        if (forwarder.mode === 'client') {
+            configWithCommandFlag.localPort = configWithCommandFlag.localPort || forwarder.port;
+        }
         
         const result = await modes[configWithCommandFlag.mode](configWithCommandFlag);
         if (result && forwarder.mode === 'server') {
@@ -567,6 +572,7 @@ const main = async () => {
         }
         
         console.log(`Starting client mode with ${localPorts.length} port mappings`);
+        console.log('starting up from config');
         
         // Create multiple configurations and run them
         const configurations = localPorts.map((localPort, index) => ({
@@ -576,6 +582,8 @@ const main = async () => {
             localPort: localPort,
             publicKey: argv.publicKey || argv['public-key']
         }));
+        
+        await runFromConfig(configurations);
         
         await runFromConfig(configurations);
     }
