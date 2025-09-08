@@ -518,10 +518,10 @@ const parseProtocolList = (protocolArg, portCount) => {
     let protocols = [];
     
     if (typeof protocolArg === 'string') {
-        if (protocolArg.includes(',')) {
-            protocols = protocolArg.split(',').map(p => p.trim());
-        } else {
-            protocols = [protocolArg];
+        // Handle comma-separated list and space-separated list
+        protocols = protocolArg.replace(/\s+/g, ',').split(',').map(p => p.trim()).filter(p => p);
+        if (protocols.length === 0) {
+            protocols = ['udp']; // Default if empty
         }
     } else if (Array.isArray(protocolArg)) {
         protocols = protocolArg;
@@ -729,21 +729,30 @@ const main = async () => {
             process.exit(1);
         }
         
-        console.log(`Starting client mode with ${localPorts.length} port mappings`);
-        console.log('starting up from config');
-        
-        // Create multiple configurations and run them
-        const configurations = localPorts.map((localPort, index) => ({
-            mode: 'client',
-            proto: protocols[index],
-            port: remotePorts[index],
-            localPort: localPort,
-            publicKey: argv.publicKey || argv['public-key']
-        }));
-        
-        await runFromConfig(configurations);
-        
-        await runFromConfig(configurations);
+                console.log(`Starting client mode with ${localPorts.length} port mappings`);
+                
+                // Create multiple configurations and run them
+                const configurations = localPorts.map((localPort, index) => ({
+                    mode: 'client',
+                    proto: protocols[index],
+                    port: remotePorts[index],
+                    localPort: localPort,
+                    publicKey: argv.publicKey || argv['public-key']
+                }));
+
+                const { tcp, udp, tcpudp } = await relay();
+                const modes = { tcp, udp, tcpudp };
+
+                // Run each configuration
+                await Promise.all(configurations.map(async config => {
+                    try {
+                        console.log(`Starting ${config.proto} client: local port ${config.localPort} -> remote port ${config.port}`);
+                        await modes[config.proto].client(config.publicKey, config.port, config);
+                    } catch (err) {
+                        console.error(`Error starting ${config.proto} client:`, err.message);
+                        throw err;
+                    }
+                }));        await runFromConfig(configurations);
     }
 };
 
