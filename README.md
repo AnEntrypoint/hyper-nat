@@ -4,6 +4,13 @@ tl;dr: play lan games with your friends or use any other network oriented tool o
 
 This program can securely negotiate and tunnel sets of UDP and TCP connections between servers and clients, allowing them to carry out low latency two directional communications without any external routing using back-punching or hole-punching mechanisms with heuristic optimizations to cater for 99% of modern internet connections.
 
+## Features
+- Simple command-line interface
+- Support for TCP, UDP, and TCP-over-UDP protocols
+- Flexible port mapping (map local ports to different remote ports)
+- Multiple connection support with different protocols
+- Configuration file support for persistent setups
+
 It does this by establishing a peer to peer connection directly to the other computer using an amazing technology called hyperswarm.
 
 https://github.com/hyperswarm
@@ -54,39 +61,58 @@ is your unique secret code, dont use the same
     ]
 }
 ```
-# client config for the same ports
-# mode 
-selects client or server
-# proto 
-selects tcp or udp
-# port 
-specifies the port number
-# serverport 
-specifies the port number on the server
-# publicKey
-is provided to you by the person who starts
-the server, it will be printed on their terminal
-when their app starts and is based on their secret
+# CLI Usage
+
+## Server Mode
+```bash
+# Run server on single port
+hyper-nat server -p 3000 -s mysecret
+
+# Run server with TCP-over-UDP on port 3000
+hyper-nat server -p 3000 --protocol tcpudp -s mysecret
+
+# Run server on multiple ports with different protocols
+hyper-nat server -p 3000,3001,3002 --protocol udp,tcp,tcpudp -s mysecret
 ```
+
+## Client Mode
+```bash
+# Connect local port 8080 to remote port 80
+hyper-nat client -l 8080 -r 80 -k <publickey>
+
+# Connect using TCP-over-UDP from local 8080 to remote 80
+hyper-nat client -l 8080 -r 80 --protocol tcpudp -k <publickey>
+
+# Connect multiple ports with different protocols
+hyper-nat client -l 8080,8081 -r 80,443 --protocol udp,tcpudp -k <publickey>
+```
+
+# Configuration File
+You can also use a configuration file (options.json) instead of command line arguments.
+
+## Client Config Example
+```json
 {
   "schema": [
     {
         "mode": "client",
         "proto": "udp",
-        "port": "7913",
-        "serverport": "7913",
-        "publicKey":"8KdZA6WUUjkpSJSFoUHKfuj2hTygNkbLFnREPwn8u89r"
+        "localPort": "8080",
+        "port": "80",
+        "publicKey": "8KdZA6WUUjkpSJSFoUHKfuj2hTygNkbLFnREPwn8u89r"
     },
     {
         "mode": "client",
         "proto": "tcp",
-        "port": "7915",
-        "serverport": "7915",
-        "publicKey":"8KdZA6WUUjkpSJSFoUHKfuj2hTygNkbLFnREPwn8u89r"
+        "localPort": "8081",
+        "port": "443",
+        "publicKey": "8KdZA6WUUjkpSJSFoUHKfuj2hTygNkbLFnREPwn8u89r"
     }
   ]
 }
 ```
+
+Note: The `publicKey` is provided by the person who starts the server. It will be printed on their terminal when their app starts and is based on their secret.
 
 # building
 To build the exe yourself, use a nexe compatible version of node, then run nexe in the path, remember to copy the static builds for sodium and udx
