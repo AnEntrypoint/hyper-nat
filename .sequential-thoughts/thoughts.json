@@ -285,7 +285,85 @@
         "contentLength": 1806,
         "processed": true
       }
+    },
+    {
+      "id": "thought_23",
+      "content": "Need to test TCP and TCPUDP forwarding with browser automation",
+      "timestamp": "2025-09-09T13:34:09.059Z",
+      "parentId": null,
+      "workingDirectory": "/mnt/c/dev/hyper-nat",
+      "metadata": {
+        "depth": 0,
+        "branchId": "branch_1757424849059",
+        "contentLength": 62,
+        "processed": true
+      }
+    },
+    {
+      "id": "thought_24",
+      "content": "First explore the codebase to understand the current structure",
+      "timestamp": "2025-09-09T13:34:09.059Z",
+      "parentId": null,
+      "workingDirectory": "/mnt/c/dev/hyper-nat",
+      "metadata": {
+        "depth": 0,
+        "branchId": "branch_1757424849059",
+        "contentLength": 62,
+        "processed": true
+      }
+    },
+    {
+      "id": "thought_25",
+      "content": "Set up TCP forwarding: port 3000 → port 3013",
+      "timestamp": "2025-09-09T13:34:09.059Z",
+      "parentId": null,
+      "workingDirectory": "/mnt/c/dev/hyper-nat",
+      "metadata": {
+        "depth": 0,
+        "branchId": "branch_1757424849059",
+        "contentLength": 44,
+        "processed": true
+      }
+    },
+    {
+      "id": "thought_26",
+      "content": "Set up TCPUDP forwarding: port 3000 → port 3014 (different port)",
+      "timestamp": "2025-09-09T13:34:09.059Z",
+      "parentId": null,
+      "workingDirectory": "/mnt/c/dev/hyper-nat",
+      "metadata": {
+        "depth": 0,
+        "branchId": "branch_1757424849059",
+        "contentLength": 64,
+        "processed": true
+      }
+    },
+    {
+      "id": "thought_27",
+      "content": "Use Playwright to test all scenarios with complete page loading verification",
+      "timestamp": "2025-09-09T13:34:09.059Z",
+      "parentId": null,
+      "workingDirectory": "/mnt/c/dev/hyper-nat",
+      "metadata": {
+        "depth": 0,
+        "branchId": "branch_1757424849059",
+        "contentLength": 76,
+        "processed": true
+      }
+    },
+    {
+      "id": "thought_28",
+      "content": "Compare performance and behavior between direct, TCP, and TCPUDP access",
+      "timestamp": "2025-09-09T13:34:09.059Z",
+      "parentId": null,
+      "workingDirectory": "/mnt/c/dev/hyper-nat",
+      "metadata": {
+        "depth": 0,
+        "branchId": "branch_1757424849059",
+        "contentLength": 71,
+        "processed": true
+      }
     }
   ],
-  "nextId": 23
+  "nextId": 29
 }
