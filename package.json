@@ -4,7 +4,7 @@
   "description": "Securely tunnel UDP and TCP connections over peer-to-peer networks using hyperswarm for NAT traversal",
   "main": "index.js",
   "bin": {
-    "hyper-nat": "./index.js"
+    "hyper-nat": "./bin/cli.js"
   },
   "scripts": {
     "build": "npx nexe",
