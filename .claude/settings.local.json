@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "mcp__playwright__browser_navigate",
+      "Bash(pkill:*)",
+      "Bash(timeout:*)",
+      "Bash(chmod:*)",
+      "Bash(lsof:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
