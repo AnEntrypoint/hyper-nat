@@ -1,3 +1,6 @@
 node_modules
 package-lock.json
 .gm-stop-verified
+dist
+*.log
+scripts/renderer-check-result.json
